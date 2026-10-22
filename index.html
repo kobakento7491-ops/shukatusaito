@@ -344,6 +344,12 @@ details.col>summary::-webkit-details-marker{display:none}
 .foot{display:flex;flex-direction:column;gap:10px;margin-top:6px;color:var(--muted);font-size:12px}
 .foot .howto{margin:0}
 
+/* 引き継ぎ */
+.xfer{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:8px;max-width:560px}
+.xfer .input{min-height:84px}
+.xfer .btn{align-self:flex-start}
+.xfer ol{margin:0;padding-left:1.4em}
+
 /* ---- スマホ表示 ---- */
 :root[data-view="phone"] .app{max-width:520px;padding-block:14px 104px;gap:14px}
 :root[data-view="phone"] #main{gap:14px}
@@ -448,6 +454,24 @@ details.col>summary::-webkit-details-marker{display:none}
           <li>これはこのページへのショートカットです。ストアから入れるネイティブアプリではなく、開くとブラウザ(Claude)で表示されます。</li>
         </ol>
       </details>
+      <details class="howto" id="xfer">
+        <summary>データの引き継ぎ・バックアップ(パソコン⇔スマホ)</summary>
+        <div class="xfer">
+          <p>この版にはサーバーがないので、自動では同期されません。次の手順で、端末どうしでデータを移せます。友達とは混ざりません。</p>
+          <ol>
+            <li>移したい側で「データをコピー」を押します。</li>
+            <li>コピーした文字を、メモやLINEのKeepなどで自分に送ります。</li>
+            <li>もう一方の端末でこの欄を開き、下の枠に貼り付けて「読み込む」を押します。</li>
+          </ol>
+          <button class="btn" id="xferCopy" type="button">データをコピー</button>
+          <textarea class="input" id="xferOut" readonly hidden aria-label="コピーしたデータ"></textarea>
+          <label class="lbl" for="xferIn">別の端末でコピーしたデータをここに貼り付け</label>
+          <textarea class="input" id="xferIn" placeholder="ここに貼り付け" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+          <button class="btn" id="xferLoad" type="button">読み込む(いまのデータに統合)</button>
+          <p class="hint" id="xferMsg" role="status"></p>
+          <p class="hint">同じ企業は、更新が新しい方が残ります。削除は反映されません。定期的にコピーを取っておくとバックアップにもなります。</p>
+        </div>
+      </details>
       <p id="verLine"></p>
     </footer>
   </div>
@@ -477,7 +501,7 @@ details.col>summary::-webkit-details-marker{display:none}
 
 /*PURE-START*/
 var DATA_VERSION=2;
-var APP_VERSION='v3.1';
+var APP_VERSION='v3.2';
 var STAGES=[
   {key:'consider',label:'検討中',short:'検討'},
   {key:'doc',label:'ES・テスト',short:'ES'},
@@ -781,6 +805,27 @@ function gcalUrl(c,e,tz){
   }
   var details='選考ステージ: '+STAGES[stageIndex(c.stage)].label+'('+c.kind+')'+(safeUrl(c.url)?'\nマイページ: '+safeUrl(c.url):'');
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(c.name+' '+e.type)+'&dates='+dates+'&details='+encodeURIComponent(details)+'&ctz='+encodeURIComponent(tz||'Asia/Tokyo');
+}
+/* 端末間の引き継ぎ: 書き出し(JSON文字列)と、更新日時が新しい方を採用する統合 */
+function exportText(list){return JSON.stringify({app:'shukatsu-board',v:DATA_VERSION,exportedAt:new Date().toISOString(),companies:list});}
+function mergeImport(existing,text){
+  var data;
+  try{data=JSON.parse(String(text||'').trim());}catch(e){return {error:'形式が正しくありません。「データをコピー」で作った内容を、そのまま貼り付けてください。'};}
+  var arr=Array.isArray(data)?data:(data&&Array.isArray(data.companies)?data.companies:null);
+  if(!arr) return {error:'このアプリのデータが見つかりません。「データをコピー」で作った内容を貼り付けてください。'};
+  var byId=Object.create(null);
+  existing.forEach(function(c){byId[c.id]=c;});
+  var out=existing.slice(),changed=[],added=0,updated=0,same=0;
+  arr.slice(0,500).forEach(function(raw){
+    if(!raw||typeof raw!=='object') return;
+    var c=norm(raw,raw.id);
+    if(!c.name) return;
+    var cur=byId[c.id];
+    if(!cur){out.push(c);byId[c.id]=c;changed.push(c);added++;}
+    else if(c.updatedAt>cur.updatedAt){out[out.indexOf(cur)]=c;byId[c.id]=c;changed.push(c);updated++;}
+    else same++;
+  });
+  return {list:out,changed:changed,added:added,updated:updated,same:same};
 }
 function fmtSize(n){return n>=1048576?(n/1048576).toFixed(1)+'MB':Math.max(1,Math.round(n/1024))+'KB';}
 function makeSamples(){
@@ -1833,6 +1878,24 @@ async function boot(){
     var lines=upcomingEvents(visible(all)).filter(function(x){return x.d>=0;}).map(function(x){return eventText(x.c,x.e);});
     if(!lines.length){toast('コピーできる予定がありません。');return;}
     copyText(lines.join('\n'),'今後の予定'+lines.length+'件をコピーしました。');
+  });
+  $('#xferCopy').addEventListener('click',function(){
+    if(!state.companies.length){$('#xferMsg').textContent='コピーできるデータがありません。企業を追加してから使ってください。';return;}
+    var text=exportText(state.companies),out=$('#xferOut');
+    out.value=text;out.hidden=false;
+    $('#xferMsg').textContent=state.companies.length+'社分のデータを作りました。コピーできない場合は、上の枠を長押しして「すべてを選択」からコピーしてください。';
+    copyText(text,state.companies.length+'社分のデータをコピーしました。もう一方の端末で貼り付けてください。');
+  });
+  $('#xferLoad').addEventListener('click',function(){
+    var msg=$('#xferMsg'),r=mergeImport(state.companies,$('#xferIn').value);
+    if(r.error){msg.textContent=r.error;return;}
+    if(!r.changed.length){msg.textContent='新しく取り込むデータはありませんでした(同じか、いまのほうが新しいデータです)。';return;}
+    state.companies=r.list;
+    r.changed.forEach(function(c){persist(c);});
+    $('#xferIn').value='';
+    render();
+    msg.textContent='読み込みました: 追加 '+r.added+'社、更新 '+r.updated+'社、変更なし '+r.same+'社。';
+    toast('データを読み込みました(追加 '+r.added+'社、更新 '+r.updated+'社)');
   });
   $('#sheetBackdrop').addEventListener('click',requestClose);
   $('#dlgBackdrop').addEventListener('click',closeDlg);
