@@ -113,7 +113,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(min(74vw,214px),1fr);gap:14px;align-items:start;overflow-x:auto;padding-bottom:14px;scroll-snap-type:x proximity}
 .col{min-width:0;display:flex;flex-direction:column;gap:10px;scroll-snap-align:start}
 .col-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding-bottom:7px;border-bottom:2px solid var(--ink)}
-.col[data-stage="offer"] .col-head{border-bottom-color:var(--go)}
+.col[data-stage="offer"] .col-head,.col[data-stage="join"] .col-head{border-bottom-color:var(--go)}
 .col[data-stage="closed"] .col-head{border-bottom-color:var(--line-strong)}
 .col-head h2{font:700 14px/1.4 var(--font-display);letter-spacing:.04em}
 .count{font:600 12px var(--font-mono);color:var(--muted)}
@@ -166,7 +166,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .day h3 small{font:500 12px var(--font-mono);color:var(--muted)}
 .day.over h3,.day.over h3 small{color:var(--shu)}
 .rows{list-style:none;padding:0;display:flex;flex-direction:column}
-.row{display:grid;grid-template-columns:20px 48px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:20px minmax(48px,auto) minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
 .row input[type="checkbox"],.ev input[type="checkbox"]{width:18px;height:18px;margin:0;accent-color:var(--ai)}
 .row .time{font:500 13px var(--font-mono);color:var(--muted)}
 .row .who{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;min-width:0}
@@ -223,9 +223,18 @@ textarea.input{min-height:120px;resize:vertical;line-height:1.6}
 .ev .t{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;min-width:0}
 .ev.done .t{color:var(--muted);text-decoration:line-through}
 .ev-empty{padding:6px 0 10px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
-.ev-add{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1.2fr) minmax(0,1fr);gap:8px}
-.ev-add .btn{grid-column:1/-1}
-@media (max-width:420px){.ev-add{grid-template-columns:1fr 1fr}.ev-add .type{grid-column:1/-1}}
+.ev-add{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px}
+.ev-add .btn,.ev-add .type{grid-column:1/-1}
+.mini-f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.mini-f .lbl{font-size:11px;letter-spacing:0}
+.mini-f .input{min-width:0}
+.dlg-row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px}
+.row .time{white-space:nowrap}
+.time-end{display:block;font-size:11px;color:var(--muted)}
+.meta.waiting{color:var(--ai);font-weight:700}
+.pill.wait{background:var(--ai-soft);color:var(--ai);border-color:transparent}
+.btn.wait{background:var(--ai-soft);border-color:var(--ai);color:var(--ai)}
+.btn.wait.on{background:var(--ai);color:var(--ai-ink)}
 .open-link{font-size:12px;font-weight:700;color:var(--ai)}
 
 /* company colors */
@@ -344,6 +353,14 @@ details.col>summary::-webkit-details-marker{display:none}
 .foot{display:flex;flex-direction:column;gap:10px;margin-top:6px;color:var(--muted);font-size:12px}
 .foot .howto{margin:0}
 
+/* 選考の種類 */
+.kind-pick{display:flex;gap:4px}
+.kp{flex:1;min-width:0;min-height:44px;padding:0 6px;border:1px solid var(--line-strong);border-radius:5px;background:var(--surface);color:var(--muted);font-weight:700;cursor:pointer}
+.kp[aria-checked="true"]{background:var(--ai);border-color:var(--ai);color:var(--ai-ink)}
+#kindSeg button{min-height:38px}
+:root[data-view="phone"] #kindSeg{width:100%}
+:root[data-view="phone"] #kindSeg button{flex:1;min-height:42px}
+
 /* 引き継ぎ */
 .xfer{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:8px;max-width:560px}
 .xfer .input{min-height:84px}
@@ -370,7 +387,7 @@ details.col>summary::-webkit-details-marker{display:none}
 :root[data-view="phone"] details.col:not([open])>summary::after{content:"▸"}
 :root[data-view="phone"] details.col[open]>.col-body{padding-bottom:12px}
 :root[data-view="phone"] .link-btn,:root[data-view="phone"] .mini{min-height:36px}
-:root[data-view="phone"] .row{grid-template-columns:24px 44px minmax(0,1fr)}
+:root[data-view="phone"] .row{grid-template-columns:24px minmax(44px,auto) minmax(0,1fr)}
 :root[data-view="phone"] .row>.chip{display:none}
 :root[data-view="phone"] .row-actions{grid-column:2/-1}
 :root[data-view="phone"] .sheet-panel{width:100%}
@@ -417,6 +434,7 @@ details.col>summary::-webkit-details-marker{display:none}
         <button class="tab" id="tab-schedule" type="button" role="tab" aria-controls="schedulePanel" aria-selected="false">予定</button>
         <button class="tab" id="tab-analytics" type="button" role="tab" aria-controls="analyticsPanel" aria-selected="false">通過率・分析</button>
       </div>
+      <div class="seg" id="kindSeg" role="group" aria-label="選考の種類で絞り込む"><button type="button" data-k="all" aria-pressed="true">すべて</button><button type="button" data-k="main" aria-pressed="false">本選考・早期</button><button type="button" data-k="intern" aria-pressed="false">インターン</button></div>
       <input class="search" id="search" type="search" placeholder="企業名・業界・メモで探す" aria-label="企業を検索" autocomplete="off">
     </div>
 
@@ -526,7 +544,7 @@ details.col>summary::-webkit-details-marker{display:none}
 
 /*PURE-START*/
 var DATA_VERSION=2;
-var APP_VERSION='v3.3';
+var APP_VERSION='v3.5';
 var STAGES=[
   {key:'consider',label:'検討中',short:'検討'},
   {key:'doc',label:'ES・テスト',short:'ES'},
@@ -536,13 +554,17 @@ var STAGES=[
   {key:'i3',label:'三次面接',short:'三次'},
   {key:'final',label:'最終面接',short:'最終'},
   {key:'offer',label:'内定',short:'内定'},
+  {key:'join',label:'インターン参加',short:'参加'},
   {key:'closed',label:'終了',short:'終了'}
 ];
 var LAST=STAGES.length-2;
-var KINDS=['本選考','インターン','早期選考','その他'];
-var EVENT_TYPES=['説明会','ES提出','Webテスト','GD','グループ面接','一次面接','二次面接','三次面接','最終面接','結果連絡','承諾期限','その他'];
-var EVENT_STAGE={'説明会':'consider','ES提出':'doc','Webテスト':'doc','GD':'gd','グループ面接':'gd','一次面接':'i1','二次面接':'i2','三次面接':'i3','最終面接':'final','承諾期限':'offer'};
-var NEXT_TYPE={'説明会':'ES提出','ES提出':'Webテスト','Webテスト':'一次面接','GD':'一次面接','グループ面接':'一次面接','一次面接':'二次面接','二次面接':'最終面接','三次面接':'最終面接','最終面接':'結果連絡'};
+var KINDS=['本選考','早期選考','インターン選考'];
+var KIND_ALIAS={'インターン':'インターン選考','その他':'本選考'};
+var MAIN_KEYS=['consider','doc','gd','i1','i2','i3','final','offer'];
+var INTERN_KEYS=['consider','doc','gd','i1','i2','i3','final','join'];
+var EVENT_TYPES=['説明会','ES提出','Webテスト','動画選考','GD','グループ面接','一次面接','二次面接','三次面接','最終面接','結果連絡','承諾期限','インターン参加','その他'];
+var EVENT_STAGE={'説明会':'consider','ES提出':'doc','Webテスト':'doc','GD':'gd','グループ面接':'i1','動画選考':'doc','一次面接':'i1','二次面接':'i2','三次面接':'i3','最終面接':'final','承諾期限':'offer','インターン参加':'join'};
+var NEXT_TYPE={'説明会':'ES提出','ES提出':'Webテスト','Webテスト':'一次面接','動画選考':'一次面接','GD':'一次面接','グループ面接':'二次面接','一次面接':'二次面接','二次面接':'最終面接','三次面接':'最終面接','最終面接':'結果連絡'};
 var LEGACY_STAGE={interview:'i1'};
 var LEGACY_REACHED=[0,1,3,6,7];
 var WD=['日','月','火','水','木','金','土'];
@@ -671,10 +693,35 @@ function owListUrl(industry){var code=OW_FIELD[industry];return code?'https://ww
 function owSearchUrl(name){return 'https://www.google.com/search?q='+encodeURIComponent('site:openwork.jp '+(name||'')+' 口コミ');}
 
 /* 選考イベントの扱い */
-function isHurdle(t){return !!EVENT_STAGE[t]&&t!=='説明会'&&t!=='承諾期限';}
-function autoStage(c,type){
+function isHurdle(t){return !!EVENT_STAGE[t]&&t!=='説明会'&&t!=='承諾期限'&&t!=='インターン参加';}
+/* 選考の種類ごとの違い: 本選考・早期選考は最後が「内定」、インターン選考は最後が「インターン参加」 */
+function isIntern(c){return !!c&&c.kind==='インターン選考';}
+function stageKeys(kind){return kind==='インターン選考'?INTERN_KEYS:MAIN_KEYS;}
+function eventTypesFor(kind){return EVENT_TYPES.filter(function(t){return t!=='インターン参加'||kind==='インターン選考';});}
+function stageForEvent(c,type){
   var k=EVENT_STAGE[type];
-  if(!k||c.stage==='closed'||c.stage==='offer') return null;
+  if(!k) return null;
+  if(k==='offer'&&isIntern(c)) k='join';
+  if(k==='join'&&!isIntern(c)) return null;
+  return k;
+}
+function fixKind(c){
+  if(isIntern(c)){
+    if(c.stage==='offer') c.stage='join';
+    if(c.reached===stageIndex('offer')) c.reached=stageIndex('join');
+  }else{
+    if(c.stage==='join') c.stage='offer';
+    if(c.reached===stageIndex('join')) c.reached=stageIndex('offer');
+  }
+}
+function nextStageKey(c){
+  var keys=stageKeys(c.kind),i=keys.indexOf(c.stage);
+  return i>=0&&i<keys.length-1?keys[i+1]:null;
+}
+function kindMatch(f,c){return f==='intern'?isIntern(c):f==='main'?!isIntern(c):true;}
+function autoStage(c,type){
+  var k=stageForEvent(c,type);
+  if(!k||c.stage==='closed'||c.stage==='offer'||c.stage==='join') return null;
   if(stageIndex(k)>stageIndex(c.stage)){applyStage(c,k);return k;}
   return null;
 }
@@ -690,8 +737,13 @@ function norm(raw,id){
   reached=Math.max(0,Math.min(LAST,reached));
   var events=(Array.isArray(c.events)?c.events:[]).map(function(e){
     e=e||{};
-    return {id:String(e.id||uid()),type:String(e.type||'その他').slice(0,20),date:parseYmd(e.date)?e.date:'',time:/^\d{2}:\d{2}$/.test(e.time||'')?e.time:'',done:!!e.done,
-      result:e.result==='pass'||e.result==='fail'?e.result:'',note:String(e.note||'').slice(0,300)};
+    var date=parseYmd(e.date)?e.date:'';
+    var time=/^\d{2}:\d{2}$/.test(e.time||'')?e.time:'';
+    var endDate=parseYmd(e.endDate)&&e.endDate>date?e.endDate:'';
+    var endTime=time&&/^\d{2}:\d{2}$/.test(e.endTime||'')?e.endTime:'';
+    if(endTime&&!endDate&&endTime<=time) endTime='';
+    return {id:String(e.id||uid()),type:String(e.type||'その他').slice(0,20),date:date,time:time,endDate:endDate,endTime:endTime,done:!!e.done,
+      result:e.result==='pass'||e.result==='fail'||e.result==='wait'?e.result:'',note:String(e.note||'').slice(0,300)};
   }).filter(function(e){return e.date;}).slice(0,80);
   var attachments=(Array.isArray(c.attachments)?c.attachments:[]).map(function(a){
     a=a||{};
@@ -700,13 +752,14 @@ function norm(raw,id){
       assetId:kind==='file'?String(a.assetId||''):'',url:kind==='link'?String(a.url||'').slice(0,500):'',
       size:Math.max(0,Number(a.size)||0),ext:String(a.ext||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,5)};
   }).filter(function(a){return a.kind==='file'?/^[A-Za-z0-9_-]{8,64}$/.test(a.assetId):!!safeUrl(a.url);}).slice(0,20);
-  return {
+  var kindIn=KIND_ALIAS[c.kind]||c.kind;
+  var out={
     v:DATA_VERSION,
     id:String(id||c.id||('c_'+uid())),
     name:String(c.name||'').slice(0,80),
     industry:String(c.industry||'').slice(0,60),
     role:String(c.role||'').slice(0,60),
-    kind:KINDS.indexOf(c.kind)>=0?c.kind:'本選考',
+    kind:KINDS.indexOf(kindIn)>=0?kindIn:'本選考',
     stage:stage,
     result:c.result==='declined'?'declined':'rejected',
     reached:reached,
@@ -719,6 +772,8 @@ function norm(raw,id){
     createdAt:Number(c.createdAt)||Date.now(),
     updatedAt:Number(c.updatedAt)||Date.now()
   };
+  fixKind(out);
+  return out;
 }
 function routeIdx(c){return c.stage==='closed'?c.reached:Math.min(stageIndex(c.stage),LAST);}
 function applyStage(c,key){
@@ -742,8 +797,10 @@ function recordResult(c,e,res,note){
     c.reached=Math.max(0,Math.min(LAST,idx));
     c.result='rejected';
   }else{
-    var wasFail=e.result==='fail';
-    e.result='';
+    var wasFail=e.result==='fail',wasWait=e.result==='wait';
+    e.result=res==='wait'?'wait':'';
+    if(res==='wait') e.done=true;
+    else if(wasWait) e.done=false;
     if(wasFail&&c.stage==='closed'&&c.result!=='declined') applyStage(c,STAGES[Math.min(c.reached,LAST)].key);
   }
 }
@@ -751,20 +808,45 @@ function failedEvent(c){
   var f=c.events.filter(function(e){return e.result==='fail';}).sort(cmpEv);
   return f.length?f[f.length-1]:null;
 }
+function waitingEvent(c){
+  var l=c.events.filter(function(e){return e.result==='wait';}).sort(cmpEv);
+  return l.length?l[l.length-1]:null;
+}
+/* 日付・時間の範囲の表示 */
+function rangeError(date,time,endDate,endTime){
+  if(endDate&&parseYmd(endDate)&&parseYmd(date)&&endDate<date) return '終了日は開始日と同じか、それより後にしてください。';
+  if(endTime&&!time) return '終了時刻を入れるときは、開始時刻も入れてください。';
+  var sameDay=!endDate||endDate===date;
+  if(endTime&&time&&sameDay&&endTime<=time) return '終了時刻は開始時刻より後にしてください。';
+  return '';
+}
+function whenText(e,full){
+  var f=full?fullDate:mdw;
+  var s=f(e.date)+(e.time?' '+e.time:'');
+  if(e.endDate&&e.endDate!==e.date) return s+'〜'+f(e.endDate)+(e.endTime?' '+e.endTime:'');
+  if(e.endTime) return s+'〜'+e.endTime;
+  return s;
+}
+/* 期間の途中(開始日が過ぎて終了日が今日以降)は「今日」として扱う */
+function effDiff(e){
+  var ds=diffDays(e.date);
+  if(ds!==null&&ds<0&&e.endDate){var de=diffDays(e.endDate);if(de!==null&&de>=0) return 0;}
+  return ds;
+}
 function nextEvent(c){
   var ups=c.events.filter(function(e){return !e.done;}).sort(cmpEv);
   return ups[0]||null;
 }
 /* 日付が今日以前で、まだ結果を入れていない選考イベント(最も古いもの) */
 function pendingResult(c){
-  var l=c.events.filter(function(e){return isHurdle(e.type)&&!e.result&&!e.done&&diffDays(e.date)<=0;}).sort(cmpEv);
+  var l=c.events.filter(function(e){return isHurdle(e.type)&&((!e.result&&!e.done&&diffDays(e.date)<=0)||e.result==='wait');}).sort(cmpEv);
   return l[0]||null;
 }
 function upcomingEvents(list){
   var out=[];
   list.forEach(function(c){
     if(c.stage==='closed') return;
-    c.events.forEach(function(e){ if(!e.done) out.push({c:c,e:e,d:diffDays(e.date)}); });
+    c.events.forEach(function(e){ if(!e.done) out.push({c:c,e:e,d:effDiff(e)}); });
   });
   out.sort(function(a,b){return cmpEv(a.e,b.e);});
   return out;
@@ -774,8 +856,9 @@ function upcomingEvents(list){
 var STEPS=[
   {key:'ES',label:'ES',types:['ES提出'],tip:'ESで落ちることが多い状態です。志望動機とガクチカを「結論→具体例(数字・役割)→学び」の順に書き直し、大学のキャリアセンターや先輩に添削してもらってから出すと通りやすくなります。'},
   {key:'テスト',label:'Webテスト',types:['Webテスト'],tip:'Webテストで落ちている可能性があります。SPI・玉手箱など企業ごとの形式を確認し、問題集を1冊繰り返して解く速さに慣れましょう。時間配分の練習が効きます。'},
-  {key:'GD',label:'GD・グループ面接',types:['GD','グループ面接'],tip:'GDでは、役割にこだわるより「議論を前に進める発言」と「他の人の意見を拾う姿勢」が見られます。模擬GDで自分のクセを録音・録画して確認してみましょう。'},
-  {key:'一次',label:'一次面接',types:['一次面接'],tip:'一次面接では、結論から話すこと、経験への深掘り質問に具体例で答えることが基本です。模擬面接を繰り返し、志望動機と自己PRを1分で話せるようにしましょう。'},
+  {key:'動画',label:'動画選考',types:['動画選考'],tip:'動画選考では、話す内容だけでなく、表情・声の大きさ・目線・背景も見られます。時間内に結論から話す練習を、スマホで撮って見返しながら繰り返しましょう。'},
+  {key:'GD',label:'GD',types:['GD'],tip:'GDでは、役割にこだわるより「議論を前に進める発言」と「他の人の意見を拾う姿勢」が見られます。模擬GDで自分のクセを録音・録画して確認してみましょう。'},
+  {key:'一次',label:'一次面接(グループ面接を含む)',types:['一次面接','グループ面接'],tip:'一次面接では、結論から話すこと、経験への深掘り質問に具体例で答えることが基本です。グループ面接では、他の人の話を踏まえて簡潔に話す練習も効きます。模擬面接を繰り返し、志望動機と自己PRを1分で話せるようにしましょう。'},
   {key:'二次',label:'二次面接',types:['二次面接'],tip:'二次面接では志望動機の一貫性と「なぜこの会社か」の根拠が見られがちです。企業研究とOB・OG訪問で解像度を上げ、逆質問も準備しましょう。'},
   {key:'三次',label:'三次面接',types:['三次面接'],tip:'三次面接では人柄・価値観とのマッチや入社後のイメージが見られやすいです。入社後に何をしたいかを具体的に話せるよう整理しましょう。'},
   {key:'最終',label:'最終面接',types:['最終面接'],tip:'最終面接では入社意思の強さと覚悟が見られます。他社の選考状況への答え方、入社後のキャリア像、第一志望である理由を整理しましょう。'}
@@ -801,8 +884,9 @@ function analyze(list){
   var tot={
     all:list.length,
     consider:cnt(function(c){return c.stage==='consider';}),
-    active:cnt(function(c){return c.stage!=='consider'&&c.stage!=='offer'&&c.stage!=='closed';}),
+    active:cnt(function(c){return c.stage!=='consider'&&c.stage!=='offer'&&c.stage!=='join'&&c.stage!=='closed';}),
     offer:cnt(function(c){return c.stage==='offer';}),
+    join:cnt(function(c){return c.stage==='join';}),
     rejected:cnt(function(c){return c.stage==='closed'&&c.result!=='declined';}),
     declined:cnt(function(c){return c.stage==='closed'&&c.result==='declined';})
   };
@@ -816,17 +900,20 @@ function safeUrl(v){
   try{var u=new URL(v);return (u.protocol==='http:'||u.protocol==='https:')?u.href:null;}catch(e){return null;}
 }
 function fullDate(s){var d=parseYmd(s);return d?d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate()+'('+WD[d.getDay()]+')':'';}
-function eventText(c,e){return fullDate(e.date)+(e.time?' '+e.time:'')+' '+c.name+' '+e.type;}
+function eventText(c,e){return whenText(e,true)+' '+c.name+' '+e.type;}
 function gcalStamp(d){return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());}
 function gcalUrl(c,e,tz){
   var d=parseYmd(e.date),dates;
+  var ed=(e.endDate&&parseYmd(e.endDate))||d;
   if(e.time){
     var hm=e.time.split(':');
     var s=new Date(d.getFullYear(),d.getMonth(),d.getDate(),+hm[0],+hm[1]);
-    var en=new Date(s.getTime()+3600000);
+    var en;
+    if(e.endTime){var em=e.endTime.split(':');en=new Date(ed.getFullYear(),ed.getMonth(),ed.getDate(),+em[0],+em[1]);}
+    else en=new Date(ed.getFullYear(),ed.getMonth(),ed.getDate(),+hm[0],+hm[1]+60);
     dates=gcalStamp(s)+'T'+pad(s.getHours())+pad(s.getMinutes())+'00/'+gcalStamp(en)+'T'+pad(en.getHours())+pad(en.getMinutes())+'00';
   }else{
-    dates=gcalStamp(d)+'/'+gcalStamp(new Date(d.getFullYear(),d.getMonth(),d.getDate()+1));
+    dates=gcalStamp(d)+'/'+gcalStamp(new Date(ed.getFullYear(),ed.getMonth(),ed.getDate()+1));
   }
   var details='選考ステージ: '+STAGES[stageIndex(c.stage)].label+'('+c.kind+')'+(safeUrl(c.url)?'\nマイページ: '+safeUrl(c.url):'');
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(c.name+' '+e.type)+'&dates='+dates+'&details='+encodeURIComponent(details)+'&ctz='+encodeURIComponent(tz||'Asia/Tokyo');
@@ -908,7 +995,7 @@ function makeSamples(){
     mk(1,{name:'ミナト情報システム',industry:'SIer・ITサービス',role:'システムエンジニア',kind:'本選考',stage:'i1',rank:4,memo:'一次面接は技術職の社員2名。志望動機は事業の話から入る。',events:[ev('ES提出',-12,'','pass'),ev('Webテスト',-8,'','pass'),evt('一次面接',1,'14:00'),evt('二次面接',9,'')]}),
     mk(2,{name:'あおば食品',industry:'食品・飲料',role:'営業(法人)',kind:'本選考',stage:'doc',rank:3,events:[ev('ES提出',-2,'','pass'),evt('Webテスト',3,'23:59')]}),
     mk(3,{name:'北斗経営研究所',industry:'コンサルティング',role:'コンサルタント',kind:'本選考',stage:'final',rank:5,memo:'ケース面接は2回通過。最終は役員面接。',events:[ev('ES提出',-30,'','pass'),ev('Webテスト',-26,'','pass'),ev('一次面接',-18,'10:00','pass'),ev('二次面接',-9,'15:00','pass'),evt('最終面接',6,'10:30')]}),
-    mk(4,{name:'桜台製薬',industry:'医薬品・医療機器',role:'研究開発',kind:'インターン',stage:'consider',rank:3,events:[evt('説明会',9,'18:30')]}),
+    mk(4,{name:'桜台製薬',industry:'医薬品・医療機器',role:'研究開発',kind:'インターン選考',stage:'consider',rank:3,events:[evt('説明会',9,'18:30')]}),
     mk(5,{name:'みどり銀行',industry:'メガバンク・信託銀行',role:'総合職',kind:'早期選考',stage:'offer',rank:3,events:[ev('ES提出',-40,'','pass'),ev('一次面接',-30,'','pass'),ev('二次面接',-20,'','pass'),ev('最終面接',-9,'','pass'),ev('結果連絡',-5,''),evt('承諾期限',13,'17:00')]}),
     mk(6,{name:'やまびこ観光',industry:'旅行・ホテル・観光',role:'企画・マーケティング',kind:'本選考',stage:'closed',result:'rejected',reached:1,rank:2,events:[ev('ES提出',-20,'','pass'),ev('Webテスト',-15,'','fail')]}),
     mk(7,{name:'はるか広告',industry:'広告',role:'営業(法人)',kind:'本選考',stage:'closed',result:'rejected',reached:3,rank:4,events:[ev('ES提出',-25,'','pass'),ev('一次面接',-14,'11:00','fail')]}),
@@ -919,7 +1006,7 @@ function makeSamples(){
 
 var STORE_KEY='shukatsu-board-v1';
 var PREF_KEY='shukatsu-board-prefs';
-var state={companies:[],q:'',tab:'board',showDone:false,view:'pc',fold:{}};
+var state={companies:[],q:'',tab:'board',showDone:false,view:'pc',fold:{},kindF:'all'};
 var store={mode:'loading',col:null,queue:Promise.resolve(),lastSnap:[]};
 var SAMPLES=[];
 var caps={assets:null,assetsNote:false,me:null};
@@ -978,11 +1065,12 @@ function loadPrefs(){
     var p=JSON.parse(localStorage.getItem(PREF_KEY)||'{}');
     if(p.tab==='schedule'||p.tab==='analytics') state.tab=p.tab;
     state.showDone=!!p.showDone;
+    if(p.kind==='main'||p.kind==='intern') state.kindF=p.kind;
     if(p.view==='pc'||p.view==='phone') state.view=p.view;
   }catch(e){}
 }
 function savePrefs(){
-  try{localStorage.setItem(PREF_KEY,JSON.stringify({tab:state.tab,showDone:state.showDone,view:state.view}));}catch(e){}
+  try{localStorage.setItem(PREF_KEY,JSON.stringify({tab:state.tab,showDone:state.showDone,view:state.view,kind:state.kindF}));}catch(e){}
 }
 
 /* ---------- storage: account (db) first, browser second ---------- */
@@ -1219,6 +1307,10 @@ function disableSync(){
 function moveTo(id,key){
   var c=findC(id);
   if(!c||c.stage===key) return;
+  if(key!=='closed'&&stageKeys(c.kind).indexOf(key)<0){
+    toast(isIntern(c)?'インターン選考には「内定」はなく、最後は「インターン参加」です。':'本選考・早期選考では「インターン参加」は使えません。');
+    return;
+  }
   var prev=clone(c);
   applyStage(c,key);
   persist(c);
@@ -1263,11 +1355,13 @@ function rankEl(n){
   for(var i=1;i<=5;i++) el.append(h('i',{class:i<=n?'on':null}));
   return el;
 }
-function routeEl(idx,closed){
+function routeEl(idx,closed,kind){
   var el=h('div',{class:'route','aria-hidden':'true'});
-  for(var i=0;i<=LAST;i++){
-    if(i>0) el.append(h('span',{class:'l'+(i<=idx?' on':'')}));
-    el.append(h('span',{class:'s'+(i<=idx?' on':'')+(i===idx&&!closed?' here':'')+(i===LAST?' goal':'')}));
+  var keys=stageKeys(kind);
+  for(var i=0;i<keys.length;i++){
+    var si=stageIndex(keys[i]);
+    if(i>0) el.append(h('span',{class:'l'+(si<=idx?' on':'')}));
+    el.append(h('span',{class:'s'+(si<=idx?' on':'')+(si===idx&&!closed?' here':'')+(i===keys.length-1?' goal':'')}));
   }
   return el;
 }
@@ -1275,10 +1369,10 @@ function nextEl(c){
   if(c.stage==='closed') return null;
   var n=nextEvent(c);
   if(!n) return h('p',{class:'next none',text:'予定なし'});
-  var d=diffDays(n.date);
+  var d=effDiff(n);
   return h('div',{class:'next'},
     h('div',{class:'line'},h('span',{class:'pill '+urgency(d),text:relLabel(d)}),h('span',{class:'what',text:n.type})),
-    h('span',{class:'when',text:mdw(n.date)+(n.time?' '+n.time:'')})
+    h('span',{class:'when',text:whenText(n)})
   );
 }
 
@@ -1291,7 +1385,7 @@ function openCompany(id,demo){
 function cardEl(c,demo){
   var idx=stageIndex(c.stage);
   var closed=c.stage==='closed';
-  var sub=[c.industry,c.role].filter(Boolean).join(' / ');
+  var sub=[c.kind!=='本選考'?c.kind:'',c.industry,c.role].filter(Boolean).join(' / ');
   var foot=h('div',{class:'card-foot'});
   var fe=closed&&c.result!=='declined'?failedEvent(c):null;
   if(closed){
@@ -1300,7 +1394,8 @@ function cardEl(c,demo){
   }else if(!demo){
     var pr=pendingResult(c);
     if(pr) foot.append(h('button',{type:'button',class:'link-btn','aria-label':c.name+' '+pr.type+'の結果を入力',text:'結果を入力',onclick:function(){openResult(c.id,pr.id);}}));
-    if(idx<LAST) foot.append(h('button',{type:'button',class:'link-btn','aria-label':c.name+'を「'+STAGES[idx+1].label+'」に進める',text:STAGES[idx+1].short+'へ ›',onclick:function(){moveTo(c.id,STAGES[idx+1].key);}}));
+    var nk=nextStageKey(c);
+    if(nk){var ns=STAGES[stageIndex(nk)];foot.append(h('button',{type:'button',class:'link-btn','aria-label':c.name+'を「'+ns.label+'」に進める',text:ns.short+'へ ›',onclick:function(){moveTo(c.id,nk);}}));}
   }
   if(c.attachments.length) foot.prepend(h('span',{class:'meta',text:'資料 '+c.attachments.length}));
   var el=h('article',{class:'card tinted'+(closed?' is-closed':''),style:'--cc:var(--k-'+c.color+')',draggable:demo||isPhone()?null:'true'},
@@ -1310,8 +1405,9 @@ function cardEl(c,demo){
         h('button',{type:'button',class:'card-name',text:c.name,onclick:function(){openCompany(c.id,demo);}})),
       rankEl(c.rank)),
     sub?h('p',{class:'card-sub',text:sub}):null,
-    routeEl(routeIdx(c),closed),
+    routeEl(routeIdx(c),closed,c.kind),
     fe?h('p',{class:'meta fail',text:fe.type+'で落選'}):null,
+    !closed&&waitingEvent(c)?h('p',{class:'meta waiting',text:waitingEvent(c).type+'の結果待ち'}):null,
     nextEl(c),
     foot.childNodes.length?foot:null
   );
@@ -1364,7 +1460,7 @@ function renderHeader(all){
   var n=function(k){return all.filter(function(c){return c.stage===k;}).length;};
   var active=all.filter(function(c){return ACTIVE_KEYS.indexOf(c.stage)>=0;}).length;
   var week=upcomingEvents(all).filter(function(x){return x.d>=0&&x.d<=7;}).length;
-  var items=[['検討中',n('consider'),'社'],['選考中',active,'社'],['内定',n('offer'),'社'],['終了',n('closed'),'社'],['7日以内の予定',week,'件']];
+  var items=[['検討中',n('consider'),'社'],['選考中',active,'社'],['内定',n('offer'),'社'],['インターン参加',n('join'),'社'],['終了',n('closed'),'社'],['7日以内の予定',week,'件']];
   $('#stats').replaceChildren.apply($('#stats'),items.map(function(it){
     return h('div',{class:'stat'},h('span',{text:it[0]}),h('b',{text:it[1]}),h('span',{text:it[2]}));
   }));
@@ -1382,7 +1478,7 @@ function renderNext(all,demo){
     btn.setAttribute('aria-label','次の予定: '+nxt.c.name+' '+nxt.e.type+'。詳細を開く');
     btn.replaceChildren(
       h('span',{class:'nu-label',text:'次の予定'}),
-      h('span',{class:'nu-when',text:mdw(nxt.e.date)+(nxt.e.time?' '+nxt.e.time:'')}),
+      h('span',{class:'nu-when',text:whenText(nxt.e)}),
       h('span',{class:'nu-what',text:nxt.c.name+'　'+nxt.e.type}),
       h('span',{class:'pill '+urgency(nxt.d),text:relLabel(nxt.d)})
     );
@@ -1394,9 +1490,16 @@ function renderNext(all,demo){
   }else{ov.hidden=true;}
 }
 
+function boardStages(){
+  return STAGES.filter(function(s){
+    if(state.kindF==='intern'&&s.key==='offer') return false;
+    if(state.kindF==='main'&&s.key==='join') return false;
+    return true;
+  });
+}
 function renderBoard(list,demo){
   var phone=isPhone();
-  var cols=STAGES.map(function(s){
+  var cols=boardStages().map(function(s){
     var items=list.filter(function(c){return c.stage===s.key;}).sort(cmpCard);
     var body=h('div',{class:'col-body'},items.length?items.map(function(c){return cardEl(c,demo);}):h('p',{class:'col-empty',text:state.q?'該当なし':'まだありません'}));
     var open=true;
@@ -1423,14 +1526,18 @@ function renderBoard(list,demo){
 }
 
 function resultBadge(e){
-  return e.result?h('span',{class:'pill '+e.result,text:e.result==='pass'?'通過':'落選'}):null;
+  return e.result?h('span',{class:'pill '+e.result,text:e.result==='pass'?'通過':e.result==='wait'?'結果待ち':'落選'}):null;
 }
 
-function rowEl(x,demo,done){
+function rowEl(x,demo,done,waitMode){
   var c=x.c,e=x.e;
   var stage=STAGES[stageIndex(c.stage)].label;
-  var ck=h('input',{type:'checkbox',checked:e.done?true:null,disabled:demo?true:null,'aria-label':c.name+' '+e.type+'を完了にする'});
-  ck.addEventListener('change',function(){toggleDone(c.id,e.id);});
+  var ck;
+  if(waitMode){ck=h('span',{'aria-hidden':'true'});}
+  else{
+    ck=h('input',{type:'checkbox',checked:e.done?true:null,disabled:demo?true:null,'aria-label':c.name+' '+e.type+'を完了にする'});
+    ck.addEventListener('change',function(){toggleDone(c.id,e.id);});
+  }
   var acts=h('div',{class:'row-actions',hidden:true},
     h('a',{class:'open-link',href:gcalUrl(c,e,TZ),target:'_blank',rel:'noopener noreferrer',text:'Googleカレンダーに追加 ↗'}),
     h('button',{type:'button',class:'mini',text:'文面をコピー',onclick:function(){copyText(eventText(c,e),'予定の文面をコピーしました。TimeTreeなどに貼り付けてください。');}}));
@@ -1438,20 +1545,24 @@ function rowEl(x,demo,done){
   tog.addEventListener('click',function(){var open=acts.hidden;acts.hidden=!open;tog.setAttribute('aria-expanded',String(open));});
   var resBtn=null;
   if(isHurdle(e.type)&&!demo&&(diffDays(e.date)<=0||e.done||e.result)){
-    resBtn=h('button',{type:'button',class:'mini'+(e.result?'':' strong'),'aria-label':c.name+' '+e.type+(e.result?'の結果を修正':'の結果を入力'),text:e.result?'修正':'結果を入力',onclick:function(){openResult(c.id,e.id);}});
+    var strong=waitMode||!e.result;
+    resBtn=h('button',{type:'button',class:'mini'+(strong?' strong':''),'aria-label':c.name+' '+e.type+(e.result&&!waitMode?'の結果を修正':'の結果を入力'),text:e.result&&!waitMode?'修正':'結果を入力',onclick:function(){openResult(c.id,e.id);}});
   }
+  var multi=e.endDate&&e.endDate!==e.date;
+  var endText=multi?'〜'+mdw(e.endDate)+(e.endTime?' '+e.endTime:''):(e.endTime?'〜'+e.endTime:'');
   return h('li',{class:'row'+(done?' done':'')},
     ck,
-    h('span',{class:'time',text:e.time||'終日'}),
+    h('span',{class:'time'},e.time||'終日',multi||!e.endTime?null:h('small',{class:'time-end',text:endText})),
     h('div',{class:'who'},
       h('span',{class:'cdot',style:'--cc:var(--k-'+c.color+')','aria-hidden':'true'}),
       h('button',{type:'button',class:'co',text:c.name,onclick:function(){openCompany(c.id,demo);}}),
       h('span',{class:'type',text:e.type}),
-      resultBadge(e),
+      multi?h('span',{class:'chip',text:endText}):null,
+      waitMode?null:resultBadge(e),
       resBtn,
-      done?null:tog),
-    h('span',{class:'chip',text:stage}),
-    acts
+      done||waitMode?null:tog),
+    waitMode?null:h('span',{class:'chip',text:stage}),
+    waitMode?null:acts
   );
 }
 
@@ -1459,12 +1570,20 @@ function renderSchedule(list,demo){
   var root=$('#sched');
   var ups=upcomingEvents(list);
   var groups=[];
+  var waits=[];
+  list.forEach(function(c){
+    if(c.stage==='closed') return;
+    c.events.forEach(function(e){if(e.result==='wait'&&isHurdle(e.type)) waits.push({c:c,e:e,d:diffDays(e.date)});});
+  });
+  waits.sort(function(a,b){return cmpEv(a.e,b.e);});
+  if(waits.length) groups.push({cls:'',wait:true,title:'結果待ち',sub:'結果が出たら「結果を入力」を押してください',items:waits});
   var over=ups.filter(function(x){return x.d<0;});
   if(over.length) groups.push({cls:'over',title:'期限切れ',sub:'日付を過ぎたまま未入力です。選考なら「結果を入力」を押してください',items:over});
   var map=new Map();
   ups.filter(function(x){return x.d>=0;}).forEach(function(x){
-    if(!map.has(x.e.date)) map.set(x.e.date,[]);
-    map.get(x.e.date).push(x);
+    var key=addDays(x.d);
+    if(!map.has(key)) map.set(key,[]);
+    map.get(key).push(x);
   });
   map.forEach(function(items,date){
     groups.push({cls:'',title:relDay(diffDays(date)),sub:mdw(date),items:items});
@@ -1472,7 +1591,7 @@ function renderSchedule(list,demo){
   var nodes=groups.map(function(g){
     return h('section',{class:'day '+g.cls},
       h('h3',{text:g.title},h('small',{text:g.sub})),
-      h('ul',{class:'rows'},g.items.map(function(x){return rowEl(x,demo,false);})));
+      h('ul',{class:'rows'},g.items.map(function(x){return rowEl(x,demo,false,!!g.wait);})));
   });
   if(state.showDone){
     var done=[];
@@ -1491,7 +1610,10 @@ function renderAnalytics(all,demo){
   if(demo) nodes.push(h('p',{class:'demo'},h('b',{text:'例のデータで表示しています。'}),h('span',{text:'自分の選考を登録して結果を入力すると、あなたの通過率に切り替わります。'})));
 
   var t=a.tot;
-  var sum=[['登録',t.all],['選考中',t.active],['内定',t.offer],['お見送り',t.rejected],['辞退',t.declined]];
+  var sum=[['登録',t.all],['選考中',t.active]];
+  if(state.kindF!=='intern') sum.push(['内定',t.offer]);
+  if(state.kindF!=='main') sum.push(['インターン参加',t.join]);
+  sum.push(['お見送り',t.rejected],['辞退',t.declined]);
   nodes.push(h('div',{class:'stats'},sum.map(function(it){return h('div',{class:'stat'},h('span',{text:it[0]}),h('b',{text:it[1]}),h('span',{text:'社'}));})));
 
   var f=a.focus,fc;
@@ -1517,23 +1639,23 @@ function renderAnalytics(all,demo){
 
   nodes.push(h('div',null,
     h('h3',{text:'選考ステップごとの通過率'}),
-    h('p',{class:'hint',text:'「結果を入力」した選考だけで計算しています(通過 ÷ 通過+落選)。件数が少ないうちは参考値です。'}),
+    h('p',{class:'hint',text:'「結果を入力」した選考だけで計算しています(通過 ÷ 通過+落選)。結果待ちは含めません。グループ面接は一次面接に含めています。件数が少ないうちは参考値です。'}),
     h('div',{class:'legend'},
       h('span',null,h('i',{style:'background:var(--go)'}),'通過'),
       h('span',null,h('i',{style:'background:var(--shu)'}),'落選'),
-      h('span',null,h('i',{style:'background:var(--line-strong)'}),'結果未入力')),
+      h('span',null,h('i',{style:'background:var(--line-strong)'}),'結果待ち・未入力')),
     h('div',{class:'funnel'},a.steps.map(function(s){
       var tot=s.pass+s.fail+s.wait;
       var w=function(v){return tot?(v/tot*100).toFixed(1):0;};
       var low=s.n>=2&&s.rate<60;
       return h('div',{class:'fn'+(low?' low':'')},
         h('span',{class:'nm',text:s.label}),
-        h('div',{class:'bar2',role:'img','aria-label':s.label+': 通過'+s.pass+'件、落選'+s.fail+'件、結果未入力'+s.wait+'件'},
+        h('div',{class:'bar2',role:'img','aria-label':s.label+': 通過'+s.pass+'件、落選'+s.fail+'件、結果待ち・未入力'+s.wait+'件'},
           tot?[h('i',{class:'p',style:'width:'+w(s.pass)+'%'}),h('i',{class:'f',style:'width:'+w(s.fail)+'%'}),h('i',{class:'w',style:'width:'+w(s.wait)+'%'})]:null),
         h('span',{class:'rate'+(s.n?'':' none'),text:s.n?s.rate+'%':'—'}),
         h('div',{class:'cnt'},
           h('span',{text:'通過 '+s.pass+'件'}),h('span',{text:'落選 '+s.fail+'件'}),
-          s.wait?h('span',{text:'結果未入力 '+s.wait+'件'}):null,
+          s.wait?h('span',{text:'結果待ち・未入力 '+s.wait+'件'}):null,
           s.n>0&&s.n<3?h('span',{text:'件数が少ないため参考値'}):null));
     }))));
 
@@ -1560,7 +1682,8 @@ function render(){
   if(store.mode==='loading') return;
   var demo=state.companies.length===0;
   var all=demo?SAMPLES:state.companies;
-  var list=visible(all);
+  var kall=all.filter(function(c){return kindMatch(state.kindF,c);});
+  var list=visible(kall);
   $('#loading').hidden=true;
   $('#main').hidden=false;
   $('#demoNote').hidden=!demo;
@@ -1568,7 +1691,7 @@ function render(){
   renderNext(all,demo);
   renderBoard(list,demo);
   renderSchedule(list,demo);
-  renderAnalytics(all,demo);
+  renderAnalytics(kall,demo);
   updateSyncUI();
 }
 
@@ -1585,6 +1708,13 @@ function setTab(t){
   });
   $('#search').hidden=t==='analytics';
   savePrefs();
+}
+function applyKindSeg(){
+  document.querySelectorAll('#kindSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.k===state.kindF));});
+}
+function setKindF(k){
+  if(k!=='all'&&k!=='main'&&k!=='intern') return;
+  state.kindF=k;applyKindSeg();savePrefs();render();
 }
 function applyView(){
   document.documentElement.setAttribute('data-view',state.view);
@@ -1641,16 +1771,20 @@ function drawDlg(){
   var nodes;
   if(step==='pass'){
     var dflt=NEXT_TYPE[e.type]||'一次面接';
-    var typeSel=h('select',{id:'dlg-type',class:'input t','aria-label':'次の予定の種類'},EVENT_TYPES.map(function(t){return h('option',{value:t,selected:t===dflt?true:null,text:t});}));
+    var typeSel=h('select',{id:'dlg-type',class:'input t','aria-label':'次の予定の種類'},eventTypesFor(c.kind).map(function(t){return h('option',{value:t,selected:t===dflt?true:null,text:t});}));
     var dateIn=h('input',{id:'dlg-date',class:'input',type:'date','aria-label':'次の予定の日付'});
-    var timeIn=h('input',{id:'dlg-time',class:'input',type:'time','aria-label':'次の予定の時刻(任意)'});
+    var timeIn=h('input',{id:'dlg-time',class:'input',type:'time','aria-label':'次の予定の開始時刻(任意)'});
+    var endDateIn=h('input',{id:'dlg-date-end',class:'input',type:'date','aria-label':'次の予定の終了日(任意)'});
+    var endTimeIn=h('input',{id:'dlg-time-end',class:'input',type:'time','aria-label':'次の予定の終了時刻(任意)'});
     var err=h('p',{class:'err',role:'alert',hidden:true});
     var addBtn=h('button',{type:'button',class:'btn primary',text:'通過にして、次の予定を追加',onclick:function(){
       if(!parseYmd(dateIn.value)){err.textContent='次の予定の日付を入力してください。日付が未定なら下のボタンを使えます。';err.hidden=false;dateIn.focus();return;}
       var nt=typeSel.value;
+      var bad=rangeError(dateIn.value,timeIn.value,endDateIn.value,endTimeIn.value);
+      if(bad){err.textContent=bad;err.hidden=false;return;}
       commitResult(function(cc,ee){
         recordResult(cc,ee,'pass');
-        cc.events.push({id:'e_'+uid(),type:nt,date:dateIn.value,time:timeIn.value||'',done:false,result:'',note:''});
+        cc.events.push({id:'e_'+uid(),type:nt,date:dateIn.value,time:timeIn.value||'',endDate:endDateIn.value||'',endTime:endTimeIn.value||'',done:false,result:'',note:''});
         autoStage(cc,nt);
       },c.name+' '+e.type+'を通過にして、'+nt+'を追加しました');
     }});
@@ -1661,12 +1795,14 @@ function drawDlg(){
         if(nt) autoStage(cc,nt);
       },c.name+' '+e.type+'を通過にしました');
     }});
-    var offerBtn=e.type==='最終面接'?h('button',{type:'button',class:'btn pass',text:'内定をもらった',onclick:function(){
-      commitResult(function(cc,ee){recordResult(cc,ee,'pass');applyStage(cc,'offer');},c.name+'の内定を記録しました');
+    var goalKey=isIntern(c)?'join':'offer';
+    var offerBtn=e.type==='最終面接'?h('button',{type:'button',class:'btn pass',text:isIntern(c)?'インターン参加が決まった':'内定をもらった',onclick:function(){
+      commitResult(function(cc,ee){recordResult(cc,ee,'pass');applyStage(cc,goalKey);},c.name+'の'+(isIntern(c)?'インターン参加':'内定')+'を記録しました');
     }}):null;
     nodes=[title,
       h('p',{class:'dlg-sub',text:'通過おめでとうございます。次の選考の予定を入れておきましょう。'}),
       h('div',{class:'dlg-row3'},typeSel,dateIn,timeIn),
+      h('div',{class:'dlg-row2'},miniField('終了日(任意)',endDateIn),miniField('終了時刻(任意)',endTimeIn)),
       err,
       h('div',{class:'dlg-actions'},addBtn,undecided,offerBtn,h('button',{type:'button',class:'mini',text:'戻る',onclick:function(){dlgCtx.step='choose';drawDlg();}}))];
   }else if(step==='fail'){
@@ -1681,12 +1817,15 @@ function drawDlg(){
         }}),
         h('button',{type:'button',class:'mini',text:'戻る',onclick:function(){dlgCtx.step='choose';drawDlg();}}))];
   }else{
-    var cur=e.result?'(いまの記録: '+(e.result==='pass'?'通過':'落選')+')':'';
+    var cur=e.result?'(いまの記録: '+(e.result==='pass'?'通過':e.result==='wait'?'結果待ち':'落選')+')':'';
     nodes=[title,
       h('p',{class:'dlg-sub',text:when+' '+cur}),
       h('div',{class:'choice'},
         h('button',{type:'button',class:'btn pass'+(e.result==='pass'?' on':''),text:'通過した',onclick:function(){dlgCtx.step='pass';drawDlg();var d=$('#dlg-date');if(d)d.focus();}}),
         h('button',{type:'button',class:'btn fail'+(e.result==='fail'?' on':''),text:'落選した',onclick:function(){dlgCtx.step='fail';drawDlg();var n=$('#dlg-note');if(n)n.focus();}})),
+      h('button',{type:'button',class:'btn wait'+(e.result==='wait'?' on':''),text:'まだ結果が出ていない(結果待ちにする)',onclick:function(){
+        commitResult(function(cc,ee){recordResult(cc,ee,'wait');},c.name+' '+e.type+'を結果待ちにしました');
+      }}),
       e.result?h('button',{type:'button',class:'mini',text:'結果の記録を取り消す',onclick:function(){commitResult(function(cc,ee){recordResult(cc,ee,'');},'結果の記録を取り消しました');}}):null,
       h('button',{type:'button',class:'btn',text:'閉じる',onclick:closeDlg})];
   }
@@ -1731,6 +1870,9 @@ function markDirty(){
   sheetCtx.discardArmed=false;
   var m=$('#footMsg');
   if(m) m.hidden=true;
+}
+function miniField(label,control){
+  return h('label',{class:'mini-f'},h('span',{class:'lbl',text:label}),control);
 }
 function field(label,control,forId,extra){
   return h('div',{class:'field'},h('label',{class:'lbl','for':forId,text:label}),control,extra||null);
@@ -1802,7 +1944,19 @@ function buildSheet(){
   nameIn.addEventListener('input',function(){drawSug(true);syncOw();});
   nameIn.addEventListener('focus',function(){drawSug(true);});
 
-  var kindSel=h('select',{id:'f-kind',class:'input'},KINDS.map(function(k){return h('option',{value:k,selected:k===d.kind?true:null,text:k});}));
+  var kindWrap=h('div',{class:'kind-pick',role:'radiogroup','aria-label':'選考の種類'});
+  var kindHint=h('span',{class:'hint'});
+  function drawKind(){
+    kindWrap.replaceChildren.apply(kindWrap,KINDS.map(function(k){
+      return h('button',{type:'button',class:'kp',role:'radio','aria-checked':String(d.kind===k),text:k,onclick:function(){
+        if(d.kind===k) return;
+        d.kind=k;fixKind(d);
+        stageNote.textContent=isIntern(d)?'インターン選考のステージにしました(最後は「インターン参加」)。':'本選考・早期選考のステージにしました(最後は「内定」)。';
+        markDirty();drawKind();drawPick();drawTypeOpts();drawEvents();
+      }});
+    }));
+    kindHint.textContent=isIntern(d)?'インターン選考は、最後が「内定」ではなく「インターン参加」になります。':'本選考・早期選考は、最後が「内定」になります。';
+  }
 
   var colorWrap=h('div',{class:'color-pick',role:'radiogroup','aria-label':'企業の色'});
   function drawColor(){
@@ -1826,8 +1980,11 @@ function buildSheet(){
   var pickWrap=h('div',{class:'stage-pick',role:'radiogroup','aria-label':'選考ステージ'});
   function drawPick(){
     var sel=routeIdx(d);
-    pickWrap.replaceChildren.apply(pickWrap,STAGES.map(function(s,i){
-      var end=i===STAGES.length-1;
+    var keys=stageKeys(d.kind).concat(['closed']);
+    pickWrap.style.gridTemplateColumns='repeat('+keys.length+',minmax(0,1fr))';
+    pickWrap.replaceChildren.apply(pickWrap,keys.map(function(key,n){
+      var s=STAGES[stageIndex(key)],i=stageIndex(key);
+      var end=key==='closed';
       return h('button',{type:'button',role:'radio','aria-checked':String(d.stage===s.key),'aria-label':s.label,class:'pick'+(end?' end':'')+(!end&&i<=sel?' past':''),
         onclick:function(){if(d.stage!==s.key){applyStage(d,s.key);stageNote.textContent='';markDirty();drawPick();drawEvents();}}},
         h('span',{class:'dot'}),h('span',{text:s.short}));
@@ -1846,7 +2003,7 @@ function buildSheet(){
       var sub=null;
       if(isHurdle(e.type)){
         var rs=h('select',{class:'input','aria-label':e.type+'の結果'},
-          h('option',{value:'',text:'結果: 未入力'}),h('option',{value:'pass',text:'通過'}),h('option',{value:'fail',text:'落選'}));
+          h('option',{value:'',text:'結果: 未入力'}),h('option',{value:'wait',text:'結果待ち'}),h('option',{value:'pass',text:'通過'}),h('option',{value:'fail',text:'落選'}));
         rs.value=e.result||'';
         rs.addEventListener('change',function(){
           recordResult(d,e,rs.value,null);
@@ -1862,18 +2019,24 @@ function buildSheet(){
       }
       return h('li',{class:'ev'+(e.done?' done':'')},
         ck,
-        h('div',{class:'t'},h('span',{class:'mono',text:mdw(e.date)+(e.time?' '+e.time:'')}),h('span',{text:e.type}),resultBadge(e),e.done||e.result?null:h('span',{class:'pill '+urgency(dd),text:relLabel(dd)})),
+        h('div',{class:'t'},h('span',{class:'mono',text:whenText(e)}),h('span',{text:e.type}),resultBadge(e),e.done||e.result?null:h('span',{class:'pill '+urgency(dd),text:relLabel(dd)})),
         h('button',{type:'button',class:'icon-btn','aria-label':e.type+'を削除',text:'削除',onclick:function(){d.events=d.events.filter(function(x){return x.id!==e.id;});markDirty();drawEvents();}}),
         sub);
     }):[h('li',{class:'ev-empty',text:'まだ日程がありません。下から追加できます。'})];
     evList.replaceChildren.apply(evList,nodes);
   }
   var evMsg=h('p',{class:'err',role:'alert',hidden:true});
-  var typeSel=h('select',{id:'ev-type',class:'input type','aria-label':'予定の種類'},
-    h('option',{value:'',text:'種類を選ぶ'}),
-    EVENT_TYPES.map(function(t){return h('option',{value:t,text:t});}));
-  var dateIn=h('input',{id:'ev-date',class:'input',type:'date','aria-label':'日付'});
-  var timeIn=h('input',{id:'ev-time',class:'input',type:'time','aria-label':'時刻(任意)'});
+  var typeSel=h('select',{id:'ev-type',class:'input type','aria-label':'予定の種類'});
+  function drawTypeOpts(){
+    var cur=typeSel.value;
+    typeSel.replaceChildren.apply(typeSel,[h('option',{value:'',text:'種類を選ぶ'})].concat(eventTypesFor(d.kind).map(function(t){return h('option',{value:t,text:t});})));
+    if(cur&&eventTypesFor(d.kind).indexOf(cur)>=0) typeSel.value=cur;
+  }
+  var dateIn=h('input',{id:'ev-date',class:'input',type:'date','aria-label':'開始日'});
+  var timeIn=h('input',{id:'ev-time',class:'input',type:'time','aria-label':'開始時刻(任意)'});
+  var endDateIn=h('input',{id:'ev-date-end',class:'input',type:'date','aria-label':'終了日(任意。複数日のときだけ)'});
+  var endTimeIn=h('input',{id:'ev-time-end',class:'input',type:'time','aria-label':'終了時刻(任意)'});
+  dateIn.addEventListener('change',function(){endDateIn.min=dateIn.value||'';});
   function syncStageFromType(){
     var k=autoStage(d,typeSel.value);
     if(k){
@@ -1885,13 +2048,18 @@ function buildSheet(){
   function addEv(){
     if(!typeSel.value){evMsg.textContent='予定の種類を選んでください。';evMsg.hidden=false;typeSel.focus();return;}
     if(!parseYmd(dateIn.value)){evMsg.textContent='日付を入力してください。';evMsg.hidden=false;dateIn.focus();return;}
+    var bad=rangeError(dateIn.value,timeIn.value,endDateIn.value,endTimeIn.value);
+    if(bad){evMsg.textContent=bad;evMsg.hidden=false;return;}
     evMsg.hidden=true;
-    d.events.push({id:'e_'+uid(),type:typeSel.value,date:dateIn.value,time:timeIn.value||'',done:false,result:'',note:''});
+    d.events.push({id:'e_'+uid(),type:typeSel.value,date:dateIn.value,time:timeIn.value||'',endDate:endDateIn.value||'',endTime:endTimeIn.value||'',done:false,result:'',note:''});
     syncStageFromType();
-    typeSel.value='';dateIn.value='';timeIn.value='';
+    typeSel.value='';dateIn.value='';timeIn.value='';endDateIn.value='';endTimeIn.value='';endDateIn.min='';
     markDirty();drawEvents();typeSel.focus();
   }
-  var addRow=h('div',{class:'ev-add'},typeSel,dateIn,timeIn,h('button',{type:'button',class:'btn',text:'日程を追加',onclick:addEv}));
+  var addRow=h('div',{class:'ev-add'},typeSel,
+    miniField('開始日',dateIn),miniField('開始時刻(任意)',timeIn),
+    miniField('終了日(複数日のとき)',endDateIn),miniField('終了時刻(任意)',endTimeIn),
+    h('button',{type:'button',class:'btn',text:'日程を追加',onclick:addEv}));
   addRow.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target.tagName!=='SELECT'){e.preventDefault();addEv();}});
 
   var urlErr=h('p',{class:'err',role:'alert',hidden:true});
@@ -1982,6 +2150,7 @@ function buildSheet(){
       h('h2',{id:'sheetTitle',text:ctx.isNew?'企業を追加':'選考の詳細'}),
       h('button',{type:'button',class:'icon-btn',text:'閉じる',onclick:requestClose})),
     h('div',{class:'sheet-scroll'},
+      h('div',{class:'field'},h('span',{class:'lbl',text:'選考の種類'}),kindWrap,kindHint),
       h('div',{class:'field combo'},
         h('label',{class:'lbl','for':'f-name',text:'企業名'}),
         nameIn,nameHint,sugBox,nameErr,
@@ -1991,10 +2160,8 @@ function buildSheet(){
       h('div',{class:'row2'},
         h('div',{class:'field'},h('label',{class:'lbl','for':'f-ind',text:'業界'}),indPick.el),
         h('div',{class:'field'},h('label',{class:'lbl','for':'f-role',text:'職種・コース'}),rolePick.el)),
-      h('div',{class:'row2'},
-        field('応募の種類',kindSel,'f-kind'),
-        h('div',{class:'field'},h('span',{class:'lbl',text:'志望度'}),rankWrap,h('span',{class:'hint',text:'5が第一志望'}))),
-      h('div',{class:'field'},h('span',{class:'lbl',text:'いまの選考ステージ'}),pickWrap,stageNote,h('span',{class:'hint',text:'日程の種類を選ぶと、対応するステージに自動で進みます(戻ることはありません)。'})),
+      h('div',{class:'field'},h('span',{class:'lbl',text:'志望度'}),rankWrap,h('span',{class:'hint',text:'5が第一志望'})),
+      h('div',{class:'field'},h('span',{class:'lbl',text:'いまの選考ステージ'}),pickWrap,stageNote,h('span',{class:'hint',text:'日程の種類を選ぶと、対応するステージに自動で進みます(戻ることはありません)。選考の種類によってステージが変わります。'})),
       resultField,
       h('div',{class:'field'},h('span',{class:'lbl',text:'選考日程と結果'}),evList,addRow,evMsg,
         h('span',{class:'hint',text:'選考が終わったら、結果を「通過」か「落選」にします。落選にするとステージが「終了」になります。通過したら、次の日程を追加してください(予定一覧の「結果を入力」なら続けて入力できます)。'})),
@@ -2016,7 +2183,7 @@ function buildSheet(){
     if(!name){nameErr.textContent='企業名を入力してください。';nameErr.hidden=false;nameIn.setAttribute('aria-invalid','true');nameIn.focus();return;}
     var url=urlIn.value.trim();
     if(url&&!safeUrl(url)){urlErr.textContent='http:// または https:// で始まるURLを入力してください。';urlErr.hidden=false;urlIn.focus();return;}
-    var next=norm(Object.assign({},d,{name:name,industry:indPick.get(),role:rolePick.get(),kind:kindSel.value,url:url?safeUrl(url):'',memo:memoIn.value}),d.id);
+    var next=norm(Object.assign({},d,{name:name,industry:indPick.get(),role:rolePick.get(),kind:d.kind,url:url?safeUrl(url):'',memo:memoIn.value}),d.id);
     next.createdAt=d.createdAt;
     var wasNew=ctx.isNew;
     var keep={};
@@ -2028,7 +2195,7 @@ function buildSheet(){
   });
 
   panel.replaceChildren(form);
-  drawColor();drawRank();drawPick();drawEvents();drawAtt();syncUrl();syncOw();drawSug(false);
+  drawKind();drawTypeOpts();drawColor();drawRank();drawPick();drawEvents();drawAtt();syncUrl();syncOw();drawSug(false);
 }
 
 function trapKeys(e){
@@ -2054,6 +2221,8 @@ async function boot(){
   loadPrefs();
   loadSyncCfg();
   applyView();
+  applyKindSeg();
+  document.querySelectorAll('#kindSeg button').forEach(function(b){b.addEventListener('click',function(){setKindF(b.dataset.k);});});
   $('#showDone').checked=state.showDone;
   $('#addBtn').addEventListener('click',function(){openSheet(null);});
   $('#navAdd').addEventListener('click',function(){openSheet(null);});
