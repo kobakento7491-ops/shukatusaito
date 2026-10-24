@@ -456,6 +456,26 @@ details.col>summary::-webkit-details-marker{display:none}
           <li>1件だけなら、「文面をコピー」してTimeTreeの予定作成画面に貼る方法が早いです。</li>
         </ol>
       </details>
+      <details class="howto" id="notifyBox" hidden>
+        <summary>前日・当日に通知する(スマホのカレンダーの通知を使う)</summary>
+        <div class="xfer">
+          <p>このアプリは、閉じているときに自分から通知を出せません。代わりに、予定を「通知つきのカレンダーファイル(.ics)」にして、スマホのカレンダーに入れると、カレンダーが前日と当日に通知します。</p>
+          <div class="dlg-row2">
+            <label class="mini-f"><span class="lbl">前日の通知時刻</span><input class="input" id="nbTime" type="time" value="20:00"></label>
+            <label class="mini-f"><span class="lbl">当日の通知時刻</span><input class="input" id="nsTime" type="time" value="08:00"></label>
+          </div>
+          <p class="hint">当日の通知は、予定が午前9時より早いときは、その1時間前になります。</p>
+          <button class="btn primary" id="icsAll" type="button">今後の予定を通知つきで保存(.ics)</button>
+          <ol>
+            <li>上のボタンを押すと、ファイルがダウンロードされます。</li>
+            <li>iPhone: ダウンロードしたファイルを開き(Safariの下向き矢印、または「ファイル」アプリ)、カレンダーの画面で「すべてを追加」を押します。</li>
+            <li>Android: ダウンロードしたファイルを開き、Googleカレンダーで保存します。</li>
+            <li>各予定の「カレンダーへ」からも、その予定だけを保存できます。</li>
+          </ol>
+          <p class="hint">日程を変えたら、もう一度保存してください。同じ予定が2つになったときは、カレンダー側で古い方を消してください。カレンダーの通知がオフだと鳴りません。</p>
+          <p class="hint" id="icsMsg" role="status"></p>
+        </div>
+      </details>
       <div class="sched" id="sched"></div>
     </section>
 
@@ -544,7 +564,7 @@ details.col>summary::-webkit-details-marker{display:none}
 
 /*PURE-START*/
 var DATA_VERSION=2;
-var APP_VERSION='v3.5';
+var APP_VERSION='v3.6';
 var STAGES=[
   {key:'consider',label:'検討中',short:'検討'},
   {key:'doc',label:'ES・テスト',short:'ES'},
@@ -985,6 +1005,58 @@ function needsPush(list,tomb,remote){
   for(var j=0;j<ids.length;j++){if(!(Number(rd[ids[j]])>=tomb[ids[j]])) return true;}
   return false;
 }
+/* カレンダー用ファイル(.ics): 前日と当日の通知(アラーム)つき */
+function icsEsc(t){return String(t||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n');}
+function icsFold(line){
+  var out=[],cur='',bytes=0,first=true;
+  for(var ch of line){
+    var cp=ch.codePointAt(0),b=cp<0x80?1:cp<0x800?2:cp<0x10000?3:4;
+    var limit=first?73:72;
+    if(bytes+b>limit){out.push(cur);cur='';bytes=0;first=false;}
+    cur+=ch;bytes+=b;
+  }
+  out.push(cur);
+  return out.join('\r\n ');
+}
+function icsUtc(d){return d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+pad(d.getUTCSeconds())+'Z';}
+function icsLocal(d){return gcalStamp(d)+'T'+pad(d.getHours())+pad(d.getMinutes())+'00';}
+function icsAt(d,hhmm,offDays){var hm=hhmm.split(':');return new Date(d.getFullYear(),d.getMonth(),d.getDate()+offDays,+hm[0],+hm[1]);}
+function icsText(items,opts){
+  opts=opts||{};
+  var tb=/^\d{2}:\d{2}$/.test(opts.before||'')?opts.before:'20:00';
+  var ts=/^\d{2}:\d{2}$/.test(opts.same||'')?opts.same:'08:00';
+  var L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//shukatsu-board//JA','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:'+icsEsc('就活選考ボード')];
+  var stamp=icsUtc(new Date());
+  items.forEach(function(x){
+    var c=x.c,e=x.e,d=parseYmd(e.date);
+    if(!d) return;
+    var ed=(e.endDate&&parseYmd(e.endDate))||d;
+    var title=c.name+' '+e.type;
+    var start=d;
+    L.push('BEGIN:VEVENT','UID:'+e.id+'@shukatsu-board','DTSTAMP:'+stamp);
+    if(e.time){
+      var hm=e.time.split(':');
+      start=new Date(d.getFullYear(),d.getMonth(),d.getDate(),+hm[0],+hm[1]);
+      var en;
+      if(e.endTime){var em=e.endTime.split(':');en=new Date(ed.getFullYear(),ed.getMonth(),ed.getDate(),+em[0],+em[1]);}
+      else en=new Date(ed.getFullYear(),ed.getMonth(),ed.getDate(),+hm[0],+hm[1]+60);
+      L.push('DTSTART:'+icsLocal(start),'DTEND:'+icsLocal(en));
+    }else{
+      L.push('DTSTART;VALUE=DATE:'+gcalStamp(d),'DTEND;VALUE=DATE:'+gcalStamp(new Date(ed.getFullYear(),ed.getMonth(),ed.getDate()+1)));
+    }
+    L.push(icsFold('SUMMARY:'+icsEsc(title)));
+    var det='選考ステージ: '+STAGES[stageIndex(c.stage)].label+'('+c.kind+')'+(safeUrl(c.url)?'\nマイページ: '+safeUrl(c.url):'');
+    L.push(icsFold('DESCRIPTION:'+icsEsc(det)));
+    var before=icsAt(d,tb,-1);
+    var same=icsAt(d,ts,0);
+    if(e.time&&start.getTime()<=same.getTime()+3600000) same=new Date(start.getTime()-3600000);
+    L.push('BEGIN:VALARM','ACTION:DISPLAY',icsFold('DESCRIPTION:'+icsEsc('明日: '+title)),'TRIGGER;VALUE=DATE-TIME:'+icsUtc(before),'END:VALARM');
+    L.push('BEGIN:VALARM','ACTION:DISPLAY',icsFold('DESCRIPTION:'+icsEsc('今日: '+title+(e.time?' '+e.time:''))),'TRIGGER;VALUE=DATE-TIME:'+icsUtc(same),'END:VALARM');
+    L.push('END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  return L.join('\r\n')+'\r\n';
+}
 function fmtSize(n){return n>=1048576?(n/1048576).toFixed(1)+'MB':Math.max(1,Math.round(n/1024))+'KB';}
 function makeSamples(){
   function ev(type,off,time,res){return {id:uid(),type:type,date:addDays(off),time:time||'',done:!!res||off<0&&type==='結果連絡',result:res||'',note:''};}
@@ -1006,7 +1078,7 @@ function makeSamples(){
 
 var STORE_KEY='shukatsu-board-v1';
 var PREF_KEY='shukatsu-board-prefs';
-var state={companies:[],q:'',tab:'board',showDone:false,view:'pc',fold:{},kindF:'all'};
+var state={companies:[],q:'',tab:'board',showDone:false,view:'pc',fold:{},kindF:'all',nb:'20:00',ns:'08:00'};
 var store={mode:'loading',col:null,queue:Promise.resolve(),lastSnap:[]};
 var SAMPLES=[];
 var caps={assets:null,assetsNote:false,me:null};
@@ -1066,11 +1138,13 @@ function loadPrefs(){
     if(p.tab==='schedule'||p.tab==='analytics') state.tab=p.tab;
     state.showDone=!!p.showDone;
     if(p.kind==='main'||p.kind==='intern') state.kindF=p.kind;
+    if(/^\d{2}:\d{2}$/.test(p.nb||'')) state.nb=p.nb;
+    if(/^\d{2}:\d{2}$/.test(p.ns||'')) state.ns=p.ns;
     if(p.view==='pc'||p.view==='phone') state.view=p.view;
   }catch(e){}
 }
 function savePrefs(){
-  try{localStorage.setItem(PREF_KEY,JSON.stringify({tab:state.tab,showDone:state.showDone,view:state.view,kind:state.kindF}));}catch(e){}
+  try{localStorage.setItem(PREF_KEY,JSON.stringify({tab:state.tab,showDone:state.showDone,view:state.view,kind:state.kindF,nb:state.nb,ns:state.ns}));}catch(e){}
 }
 
 /* ---------- storage: account (db) first, browser second ---------- */
@@ -1181,6 +1255,16 @@ function copyText(text,okMsg){
     }
   }catch(e){}
   fallback();
+}
+function inArtifact(){return !!(window.claude&&typeof window.claude.use==='function');}
+function notifyOpts(){return {before:state.nb,same:state.ns};}
+function downloadIcs(name,text){
+  var blob=new Blob([text],{type:'text/calendar;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=h('a',{href:url,download:name});
+  document.body.append(a);
+  a.click();
+  setTimeout(function(){a.remove();URL.revokeObjectURL(url);},5000);
 }
 function upsert(c){
   var i=state.companies.findIndex(function(x){return x.id===c.id;});
@@ -1540,7 +1624,8 @@ function rowEl(x,demo,done,waitMode){
   }
   var acts=h('div',{class:'row-actions',hidden:true},
     h('a',{class:'open-link',href:gcalUrl(c,e,TZ),target:'_blank',rel:'noopener noreferrer',text:'Googleカレンダーに追加 ↗'}),
-    h('button',{type:'button',class:'mini',text:'文面をコピー',onclick:function(){copyText(eventText(c,e),'予定の文面をコピーしました。TimeTreeなどに貼り付けてください。');}}));
+    h('button',{type:'button',class:'mini',text:'文面をコピー',onclick:function(){copyText(eventText(c,e),'予定の文面をコピーしました。TimeTreeなどに貼り付けてください。');}}),
+    inArtifact()||demo?null:h('button',{type:'button',class:'mini',text:'通知つきで保存(.ics)',onclick:function(){downloadIcs('shukatsu-'+e.date+'.ics',icsText([{c:c,e:e}],notifyOpts()));toast('前日と当日の通知つきでファイルを作りました。開いてカレンダーに追加してください。');}}));
   var tog=h('button',{type:'button',class:'mini','aria-expanded':'false',text:'カレンダーへ'});
   tog.addEventListener('click',function(){var open=acts.hidden;acts.hidden=!open;tog.setAttribute('aria-expanded',String(open));});
   var resBtn=null;
@@ -2255,6 +2340,17 @@ async function boot(){
     render();
     msg.textContent='読み込みました: 追加 '+r.added+'社、更新 '+r.updated+'社、変更なし '+r.same+'社。';
     toast('データを読み込みました(追加 '+r.added+'社、更新 '+r.updated+'社)');
+  });
+  $('#notifyBox').hidden=inArtifact();
+  $('#nbTime').value=state.nb;$('#nsTime').value=state.ns;
+  $('#nbTime').addEventListener('change',function(e){if(e.target.value){state.nb=e.target.value;savePrefs();}});
+  $('#nsTime').addEventListener('change',function(e){if(e.target.value){state.ns=e.target.value;savePrefs();}});
+  $('#icsAll').addEventListener('click',function(){
+    var msg=$('#icsMsg');
+    var items=upcomingEvents(state.companies).filter(function(x){return x.d>=0;});
+    if(!items.length){msg.textContent='保存できる今後の予定がありません。企業を追加して、日程を入れてください。';return;}
+    downloadIcs('shukatsu-board.ics',icsText(items,notifyOpts()));
+    msg.textContent=items.length+'件の予定を、前日'+state.nb+'と当日'+state.ns+'の通知つきで書き出しました。ダウンロードしたファイルを開いて、カレンダーに追加してください。';
   });
   $('#syncEnable').addEventListener('click',enableSync);
   $('#syncNowBtn').addEventListener('click',function(){syncNow();});
